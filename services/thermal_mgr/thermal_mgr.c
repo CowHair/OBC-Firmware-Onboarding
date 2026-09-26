@@ -51,15 +51,8 @@ error_code_t thermalMgrSendEvent(thermal_mgr_event_t *event) {
 }
 
 void osHandlerLM75BD(void) {
-  float temp;
-  error_code_t errCode = readTempLM75BD(LM75BD_OBC_I2C_ADDR, &temp);
-
-  if(errCode != ERR_CODE_SUCCESS) return;
-
   thermal_mgr_event_t event;
   event.type = THERMAL_MGR_EVENT_OS_INTERRUPT;
-  event.OverTemp = (temp>LM75BD_DEFAULT_HYST_THRESH);
-
   thermalMgrSendEvent(&event);
 }
 
@@ -81,18 +74,19 @@ static void thermalMgr(void *pvParameters) {
         }
 
         case THERMAL_MGR_EVENT_OS_INTERRUPT:{
-          if(event.OverTemp){
+          float temp;
+          error_code_t errCode = readTempLM75BD(config->devAddr, &temp);
+          if (errCode == ERR_CODE_SUCCESS){
+            if (temp > LM75BD_DEFAULT_HYST_THRESH){
             overTemperatureDetected();
-          } else{
-            safeOperatingConditions();
+            } else{
+              safeOperatingConditions();
+            }
           }
           break;
         }
-
-        default:
-          break;
+      }  
       }
-     }    
   }
 }
 

@@ -12,7 +12,6 @@ typedef enum {
 
 typedef struct {
   thermal_mgr_event_type_t type;
-  bool OverTemp;
 } thermal_mgr_event_t;
 
 #ifdef __cplusplus
